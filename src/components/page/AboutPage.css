@@ -1,4 +1,8 @@
 /* About page – recruiter-friendly, clear hierarchy, subtle accent */
+p {
+  text-align: justify;
+}
+
 .about-page {
   min-height: 100%;
   background: linear-gradient(180deg, #f8fafc 0%, #ffffff 12rem);
@@ -71,22 +75,22 @@
 .about-closing {
   color: #475569;
   padding-top: 0.5rem;
-  border-top: 1px solid #e2e8f0;
   margin-top: 0.5rem !important;
 }
 
 /* Skills – cards with accent */
 .about-skills {
   display: grid;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .about-skill-card {
   padding: 1.25rem 1.5rem;
-  background: #ffffff;
+  background: #fafafa;
   border-radius: 10px;
-  border-left: 4px solid #0f766e;
-  box-shadow: 0 1px 3px rgba(15, 118, 110, 0.08);
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #064e3b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
 .about-skill-title {
