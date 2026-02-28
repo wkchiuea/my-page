@@ -20,7 +20,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "generate-articles": "node scripts/generate-articles.js",
-    "prebuild": "npm run generate-articles"
+    "prebuild": "npm run generate-articles",
+    "deploy": "npm run build && node scripts/postbuild-gh-pages.js && gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -39,5 +40,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "homepage": "https://wkchiuea.github.io/my-page"
 }

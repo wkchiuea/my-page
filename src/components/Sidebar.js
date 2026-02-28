@@ -7,6 +7,9 @@ import './Sidebar.css';
 function Sidebar() {
   const [postCount, setPostCount] = useState(0);
   const [categoryCount, setCategoryCount] = useState(0);
+  const [profileImgError, setProfileImgError] = useState(false);
+
+  const profilePicSrc = `${process.env.PUBLIC_URL || ''}/profile-pic.png`;
 
   useEffect(() => {
     let cancelled = false;
@@ -28,7 +31,16 @@ function Sidebar() {
       <div className="sidebar-content">
         <div className="sidebar-profile">
           <div className="profile-image-wrapper">
-            <img src="/logo192.png" alt="Profile" className="sidebar-icon" />
+            {profileImgError ? (
+              <div className="sidebar-icon sidebar-icon-fallback" aria-hidden="true">LC</div>
+            ) : (
+              <img
+                src={profilePicSrc}
+                alt="Profile"
+                className="sidebar-icon"
+                onError={() => setProfileImgError(true)}
+              />
+            )}
           </div>
           <h2 className="sidebar-name">Louis Chiu</h2>
         </div>
