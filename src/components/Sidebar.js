@@ -30,7 +30,7 @@ function Sidebar() {
           <div className="profile-image-wrapper">
             <img src="/logo192.png" alt="Profile" className="sidebar-icon" />
           </div>
-          <h2 className="sidebar-name">Yoshida Lemon</h2>
+          <h2 className="sidebar-name">Louis Chiu</h2>
         </div>
 
         <nav className="sidebar-nav">
@@ -79,7 +79,7 @@ function Sidebar() {
       </div>
 
       <div className="sidebar-footer">
-        <p>© 2026 Yoshida Lemon</p>
+        <p>© 2026 Louis Chiu</p>
         <p className="footer-note">Powered by React</p>
       </div>
     </div>
