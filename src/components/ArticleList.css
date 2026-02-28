@@ -19,13 +19,15 @@
 
 .article-card {
   background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  padding-bottom: 2rem;
-  margin-bottom: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .article-card:last-of-type {
-  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .article-title {

@@ -1,0 +1,27 @@
+{
+  "sidebarUrl": {
+    "github": "https://github.com/wkchiuea",
+    "linkedin": "https://www.linkedin.com/in/wk-louis-chiu-04b132142"
+  },
+  "aboutPage": {
+    "skills": [
+      { "title": "Backend", "items": ["Java Spring Boot", "Node.js"] },
+      { "title": "Frontend", "items": ["Vue.js", "React", "Angular", "jQuery"] },
+      { "title": "Mobile", "items": ["Flutter", "Swift / iOS"] },
+      { "title": "AI & Machine Learning", "items": ["Python", "PyTorch", "TensorFlow"] },
+      { "title": "Database", "items": ["MySQL", "PostgreSQL", "MongoDB", "Redis"] },
+      { "title": "DevOps & Infrastructure", "items": ["Docker", "Kafka"] }
+    ],
+    "certifications": [
+      "AWS Certified Cloud Practitioner",
+      "AWS Certified AI Practitioner",
+      "AWS Certified Developer - Associate"
+    ],
+    "languages": [
+      { "name": "Chinese", "level": "Native" },
+      { "name": "English", "level": "Proficient" },
+      { "name": "Mandarin", "level": "Proficient" },
+      { "name": "Japanese", "level": "N1" }
+    ]
+  }
+}

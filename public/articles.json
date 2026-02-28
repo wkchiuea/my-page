@@ -7,7 +7,7 @@
       "category": "Computer",
       "tag": "",
       "image": "",
-      "excerpt": "Functional Programming（函數式程式設計）是一種把「函數」視為主要組成單位的程式設計範式。它起源於數學上的 λ-計算（Lambda Calculus），注重用純函數 (pure function) 來處理資料、避免副作用 (side effects)、以及資料不可變性 (immutability)。對比於物件導向程式設計（OOP）的以「物件」為中心，函數式編程強調資料的流動和資訊的轉換，常見語言有：Haskell、Lisp、Scala、F#，以及 Python、JavaScript 等多范式語言的支援。 --- ## 函數式程式設計的核心概念 1. **純函數 (Pure Function)** 純函數的輸出僅決定於輸入參數，不依賴也不改變外部狀態（無副作用）。這有助於程式可預測和易於測試。 2. **不可變性 (Immutability)** 資料一經創建即不可變。修改資料時，會回傳新的資料副本，確保狀態不被意外改動。 3. **高階函數 (Higher-Order Functions)** 函數可以作為參數傳遞給其他函數，或作為回傳值。這讓程式更具彈性和可重用性。 4. **宣告式程式設計 (Declarative Programming)** 強調「做什麼」（what），而不是「怎麼做」（how）；更關注運算結果而非具體的執行過程。 --- ## 簡單範例 以下是一些使用函數式程式設計風格的 Python 和 JavaScript 範例： ### Python 範例 ```python # 一個純函數 def add(x,..."
+      "excerpt": "Functional Programming（函數式程式設計）是一種把「函數」視為主要組成單位的程式設計範式。它起源於數學上的 λ-計算（Lambda Calculus），注重用純函數 (pure function) 來處理資料、避免副作用 (side effects)、以及資料不可變性 (immutability)。對比於物件導向程式設計（OOP）的以「物件」為中心，函數式編程強調資料的流動和資訊的轉換，常見語言有：Haskell、Lisp、Scala、F#，以及 Python、JavaScript 等多范式語言的支援。 ## 函數式程式設計的核心概念 1. **純函數 (Pure Function)** 純函數的輸出僅決定於輸入參數，不依賴也不改變外部狀態（無副作用）。這有助於程式可預測和易於測試。 2. **不可變性 (Immutability)** 資料一經創建即不可變。修改資料時，會回傳新的資料副本，確保狀態不被意外改動。 3. **高階函數 (Higher-Order Functions)** 函數可以作為參數傳遞給其他函數，或作為回傳值。這讓程式更具彈性和可重用性。 4. **宣告式程式設計 (Declarative Programming)** 強調「做什麼」（what），而不是「怎麼做」（how）；更關注運算結果而非具體的執行過程。 ## 簡單範例 以下是一些使用函數式程式設計風格的 Python 和 JavaScript 範例： ### Python 範例 ```python # 一個純函數 def add(x, y): return..."
     },
     {
       "id": "20260228",
@@ -16,7 +16,7 @@
       "category": "Computer",
       "tag": "",
       "image": "",
-      "excerpt": "Object-oriented Programming（OOP，物件導向程式設計）是一種以物件為中心的程式設計方法。OOP 透過封裝（Encapsulation）、繼承（Inheritance）和多型（Polymorphism）這三大特性，讓程式架構更加模組化、易於維護與擴展。在 OOP 中，物件（Object）是從類別（Class）實例化而來，代表現實世界中的事物或概念。 ## OOP 的三大特性 1. **封裝（Encapsulation）** 將資料（屬性）和行為（方法）包裝在同一個類別中，外部只能透過類別提供的介面與物件互動。 2. **繼承（Inheritance）** 允許新類別繼承現有類別的屬性及方法，實現程式碼重用，形成階層結構。 3. **多型（Polymorphism）** 允許同一方法名稱在不同類別中有不同實現，達到介面的統一與彈性。 --- ## 簡單範例 以下分別使用 Python 與 JavaScript 實作簡單的 OOP 範例： ### Python 範例 ```python # 定義一個 Animal 類別 class Animal: def __init__(self, name): self.name = name def speak(self): print(f\"{self.name} 發出聲音\") # 繼承 Animal，定義..."
+      "excerpt": "Object-oriented Programming（OOP，物件導向程式設計）是一種以物件為中心的程式設計方法。OOP 透過**封裝（Encapsulation）**、**抽象（Abstraction）**、**繼承（Inheritance）**與**多型（Polymorphism）**這四大支柱，讓程式架構更加模組化、易於維護與擴展。在 OOP 中，物件（Object）是從類別（Class）實例化而來，代表現實世界中的事物或概念。 ## OOP 的四大支柱 1. **封裝（Encapsulation）** 將資料（屬性）和行為（方法）包裝在同一個類別中，外部只能透過類別提供的介面與物件互動，隱藏內部實作細節。 2. **抽象（Abstraction）** 只對外暴露必要的介面，隱藏複雜的實作邏輯。透過抽象，我們可以專注於「做什麼」而非「怎麼做」，降低使用者的認知負擔。 3. **繼承（Inheritance）** 允許新類別繼承現有類別的屬性及方法，實現程式碼重用，形成階層結構。 4. **多型（Polymorphism）** 允許同一方法名稱在不同類別中有不同實現，達到介面的統一與彈性。 ## 簡單範例 以下分別使用 Python 與 JavaScript 實作簡單的 OOP 範例： ### Python 範例 ```python # 定義一個 Animal 類別 class Animal: def __init__(self, name): self.name = name def speak(self): print(f\"{self.name} 發出聲音\") #..."
     }
   ]
 }

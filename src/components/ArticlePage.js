@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { fetchArticleContent, parseArticleMd } from '../api/articles';
 import './ArticlePage.css';
 
@@ -49,21 +51,58 @@ function ArticlePage() {
     return () => { cancelled = true; };
   }, [id]);
 
+  /** Parse inline **bold** (and *italic*) into React nodes */
+  const renderInlineMarkdown = (text, keyPrefix) => {
+    if (!text || typeof text !== 'string') return text;
+    const parts = [];
+    let key = 0;
+    const combinedRegex = /\*\*(.+?)\*\*|\*(.+?)\*/g;
+    let lastIndex = 0;
+    let match;
+    while ((match = combinedRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(text.slice(lastIndex, match.index));
+      }
+      if (match[1] !== undefined) {
+        parts.push(<strong key={`${keyPrefix}-${key++}`}>{match[1]}</strong>);
+      } else if (match[2] !== undefined) {
+        parts.push(<em key={`${keyPrefix}-${key++}`}>{match[2]}</em>);
+      }
+      lastIndex = combinedRegex.lastIndex;
+    }
+    if (lastIndex < text.length) {
+      parts.push(text.slice(lastIndex));
+    }
+    return parts.length > 0 ? parts : text;
+  };
+
   const formatContent = (content) => {
     if (!content) return null;
     const lines = content.split('\n');
     const out = [];
     let i = 0;
     let inCodeBlock = false;
+    let codeBlockLang = 'text';
     let codeLines = [];
 
     const flushCodeBlock = () => {
       if (codeLines.length > 0) {
+        const code = codeLines.join('\n');
         out.push(
-          <pre key={`code-${i}`} className="content-code">
-            <code>{codeLines.join('\n')}</code>
-          </pre>
+          <div key={`code-${i}`} className="content-code-wrap">
+            <SyntaxHighlighter
+              language={codeBlockLang}
+              style={vscDarkPlus}
+              showLineNumbers
+              customStyle={{ margin: 0 }}
+              codeTagProps={{ style: { fontFamily: 'inherit' } }}
+              wrapLongLines
+            >
+              {code}
+            </SyntaxHighlighter>
+          </div>
         );
+        i += 1;
         codeLines = [];
       }
       inCodeBlock = false;
@@ -75,6 +114,7 @@ function ArticlePage() {
         if (inCodeBlock) {
           flushCodeBlock();
         } else {
+          codeBlockLang = (line.slice(3).trim() || 'text').toLowerCase();
           inCodeBlock = true;
         }
         continue;
@@ -84,13 +124,13 @@ function ArticlePage() {
         continue;
       }
       if (line.startsWith('## ')) {
-        out.push(<h2 key={idx} className="content-heading">{line.replace(/^##\s*/, '')}</h2>);
+        out.push(<h2 key={idx} className="content-heading">{renderInlineMarkdown(line.replace(/^##\s*/, ''), `h2-${idx}`)}</h2>);
       } else if (line.startsWith('### ')) {
-        out.push(<h3 key={idx} className="content-subheading">{line.replace(/^###\s*/, '')}</h3>);
+        out.push(<h3 key={idx} className="content-subheading">{renderInlineMarkdown(line.replace(/^###\s*/, ''), `h3-${idx}`)}</h3>);
       } else if (line.trim() === '') {
         out.push(<br key={idx} />);
       } else {
-        out.push(<p key={idx} className="content-paragraph">{line}</p>);
+        out.push(<p key={idx} className="content-paragraph">{renderInlineMarkdown(line, `p-${idx}`)}</p>);
       }
     }
     flushCodeBlock();
