@@ -20,3 +20,7 @@ if (!fs.existsSync(indexHtml)) {
 
 fs.copyFileSync(indexHtml, notfoundHtml);
 console.log('Copied index.html to 404.html for GitHub Pages SPA routing.');
+
+const nojekyll = path.join(buildDir, '.nojekyll');
+fs.writeFileSync(nojekyll, '', 'utf8');
+console.log('Created build/.nojekyll so GitHub Pages serves static files (including .md).');

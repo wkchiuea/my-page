@@ -22,7 +22,7 @@
     "generate-articles": "node scripts/generate-articles.js",
     "prebuild": "npm run generate-articles",
     "postbuild:gh": "node scripts/postbuild-gh-pages.js",
-    "deploy": "npm run build && node scripts/postbuild-gh-pages.js && gh-pages -d build"
+    "deploy": "npm run build && node scripts/postbuild-gh-pages.js && gh-pages -d build --dotfiles"
   },
   "eslintConfig": {
     "extends": [
