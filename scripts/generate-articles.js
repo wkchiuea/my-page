@@ -47,9 +47,24 @@ function parseFrontmatter(raw) {
   return { frontmatter, content: content.trim() };
 }
 
+/** Remove markdown and special formatting for plain-text excerpt */
+function stripMarkdown(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/__(.+?)__/g, '$1')
+    .replace(/_(.+?)_/g, '$1')
+    .replace(/^#+\s*/gm, '')
+    .replace(/`{3}[\s\S]*?`{3}/g, ' ')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function firstWords(text, n = EXCERPT_WORDS) {
-  const words = text.replace(/\s+/g, ' ').trim().split(' ');
-  if (words.length <= n) return text.trim();
+  const plain = stripMarkdown(text);
+  const words = plain.split(' ').filter(Boolean);
+  if (words.length <= n) return plain;
   return words.slice(0, n).join(' ') + '...';
 }
 

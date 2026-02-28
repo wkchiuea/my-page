@@ -50,6 +50,10 @@ function Sidebar() {
             <span className="nav-icon">🏷️</span>
             <span className="nav-text">Category</span>
           </Link>
+          <Link to="/tools" className="nav-link">
+            <span className="nav-icon">🛠️</span>
+            <span className="nav-text">Tools</span>
+          </Link>
         </nav>
 
         <div className="sidebar-stats">
