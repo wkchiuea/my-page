@@ -8,6 +8,8 @@ import AboutPage from './components/page/AboutPage';
 import PlaceholderPage from './components/page/PlaceholderPage';
 import ToolsPage from './components/page/ToolsPage';
 import SpeedReader from './components/page/tools/SpeedReader';
+import Metronome from './components/page/tools/Metronome';
+import Timer from './components/page/tools/Timer';
 import Sidebar from './components/Sidebar';
 
 function App() {
@@ -28,8 +30,8 @@ function App() {
               <Route path="/tools" element={<ToolsPage />} />
               <Route path="/tools/speed-reader" element={<SpeedReader />} />
               <Route path="/tools/flash-number" element={<PlaceholderPage title="Flash Number" />} />
-              <Route path="/tools/metronome" element={<PlaceholderPage title="Metronome 節拍器" />} />
-              <Route path="/tools/timer" element={<PlaceholderPage title="Timer 計時器" />} />
+              <Route path="/tools/metronome" element={<Metronome />} />
+              <Route path="/tools/timer" element={<Timer />} />
             </Routes>
             </div>
             <div className="right-column">

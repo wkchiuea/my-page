@@ -1,0 +1,35 @@
+.timer-page .timer-input-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.timer-page .timer-input-row .tool-label {
+  flex: 1;
+}
+
+.timer-display {
+  margin-top: 2rem;
+  font-size: 3.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.timer-display:hover {
+  color: #0f766e;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.timer-done {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 1.125rem;
+  color: #64748b;
+}
