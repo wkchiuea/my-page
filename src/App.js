@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { SidebarContext } from './context/SidebarContext';
+import ScrollToTop from './components/ScrollToTop';
 import ArticleList from './components/ArticleList';
 import ArticlePage from './components/ArticlePage';
 import AboutPage from './components/page/AboutPage';
@@ -18,6 +19,7 @@ function App() {
   return (
     <SidebarContext.Provider value={{ sidebarVisible, setSidebarVisible }}>
       <Router basename={process.env.PUBLIC_URL || ''}>
+        <ScrollToTop />
         <div className="App">
           <div className={`main-content${sidebarVisible ? '' : ' sidebar-hidden'}`}>
             <div className="left-column">
