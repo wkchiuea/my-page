@@ -112,6 +112,24 @@
   min-width: 140px;
 }
 
+.speed-reader-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+}
+
+.speed-reader-radio-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9375rem;
+  color: #475569;
+}
+
+.speed-reader-radio-option input {
+  margin: 0;
+}
+
 .speed-reader-input {
   width: 100%;
   padding: 0.5rem 0.75rem;

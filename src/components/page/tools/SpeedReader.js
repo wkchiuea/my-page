@@ -8,8 +8,12 @@ function SpeedReader() {
   const navigate = useNavigate();
   const { sidebarVisible, setSidebarVisible } = useContext(SidebarContext);
   const [passage, setPassage] = useState('');
-  const [wpm, setWpm] = useState(600);
-  const [chunkSize, setChunkSize] = useState(3);
+  const [wpmInput, setWpmInput] = useState('600');
+  const [displayTimeSecInput, setDisplayTimeSecInput] = useState('0.3');
+  const [timingMode, setTimingMode] = useState('wpm');
+  const [chunkSizeInput, setChunkSizeInput] = useState('3');
+  const [fontSizeInput, setFontSizeInput] = useState('16');
+  const [activeDurationMs, setActiveDurationMs] = useState(0);
   const [chunks, setChunks] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
@@ -36,7 +40,7 @@ function SpeedReader() {
       setIsRunning(false);
       return;
     }
-    const durationMs = (chunkSize / wpm) * 60 * 1000;
+    const durationMs = Math.max(1, activeDurationMs);
     timerRef.current = setTimeout(() => {
       setCurrentIndex((i) => {
         const next = i + 1;
@@ -45,16 +49,31 @@ function SpeedReader() {
       });
     }, durationMs);
     return clearTimer;
-  }, [isRunning, isPaused, currentIndex, chunks.length, chunkSize, wpm]);
+  }, [isRunning, isPaused, currentIndex, chunks.length, activeDurationMs]);
 
   const handleStart = () => {
     const words = passage.trim().split(/\s+/).filter(Boolean);
     if (words.length === 0) return;
-    const size = Math.max(1, Math.min(chunkSize, words.length));
+
+    const parsedChunkSize = Number(chunkSizeInput);
+    const parsedWpm = Number(wpmInput);
+    const parsedDisplayTimeSec = Number(displayTimeSecInput);
+
+    if (!Number.isFinite(parsedChunkSize) || parsedChunkSize <= 0) return;
+    if (timingMode === 'wpm' && (!Number.isFinite(parsedWpm) || parsedWpm <= 0)) return;
+    if (timingMode === 'displayTime' && (!Number.isFinite(parsedDisplayTimeSec) || parsedDisplayTimeSec <= 0)) return;
+
+    const size = Math.max(1, Math.min(Math.floor(parsedChunkSize), words.length));
     const list = [];
     for (let i = 0; i < words.length; i += size) {
       list.push(words.slice(i, i + size).join(' '));
     }
+    const durationMs =
+      timingMode === 'wpm'
+        ? (size / parsedWpm) * 60 * 1000
+        : parsedDisplayTimeSec * 1000;
+
+    setActiveDurationMs(durationMs);
     setChunks(list);
     setCurrentIndex(0);
     setIsPaused(false);
@@ -77,7 +96,15 @@ function SpeedReader() {
     setIsPaused(false);
   };
 
-  const canStart = passage.trim().length > 0 && !isRunning;
+  const canStart =
+    passage.trim().length > 0 &&
+    !isRunning &&
+    Number(chunkSizeInput) > 0 &&
+    (timingMode === 'wpm'
+      ? Number(wpmInput) > 0
+      : Number(displayTimeSecInput) > 0);
+
+  const displayFontSize = Math.max(8, Number(fontSizeInput) || 12);
 
   return (
     <div className="speed-reader-page">
@@ -115,14 +142,54 @@ function SpeedReader() {
           )}
           <div className="speed-reader-row">
             <label className="speed-reader-label">
+              <span>Timing mode</span>
+              <div className="speed-reader-radio-group">
+                <label className="speed-reader-radio-option">
+                  <input
+                    type="radio"
+                    name="timingMode"
+                    value="wpm"
+                    checked={timingMode === 'wpm'}
+                    onChange={() => setTimingMode('wpm')}
+                    disabled={isRunning}
+                  />
+                  <span>Use WPM</span>
+                </label>
+                <label className="speed-reader-radio-option">
+                  <input
+                    type="radio"
+                    name="timingMode"
+                    value="displayTime"
+                    checked={timingMode === 'displayTime'}
+                    onChange={() => setTimingMode('displayTime')}
+                    disabled={isRunning}
+                  />
+                  <span>Use display time</span>
+                </label>
+              </div>
+            </label>
+          </div>
+          <div className="speed-reader-row">
+            <label className="speed-reader-label">
               <span>Words per minute (WPM)</span>
               <input
                 type="number"
-                min={60}
-                max={1500}
-                value={wpm}
-                onChange={(e) => setWpm(Number(e.target.value) || 600)}
-                disabled={isRunning}
+                min={1}
+                value={wpmInput}
+                onChange={(e) => setWpmInput(e.target.value)}
+                disabled={isRunning || timingMode !== 'wpm'}
+                className="speed-reader-input"
+              />
+            </label>
+            <label className="speed-reader-label">
+              <span>Display time per chunk (sec)</span>
+              <input
+                type="number"
+                min={0.1}
+                step={0.1}
+                value={displayTimeSecInput}
+                onChange={(e) => setDisplayTimeSecInput(e.target.value)}
+                disabled={isRunning || timingMode !== 'displayTime'}
                 className="speed-reader-input"
               />
             </label>
@@ -131,9 +198,19 @@ function SpeedReader() {
               <input
                 type="number"
                 min={1}
-                max={20}
-                value={chunkSize}
-                onChange={(e) => setChunkSize(Number(e.target.value) || 1)}
+                value={chunkSizeInput}
+                onChange={(e) => setChunkSizeInput(e.target.value)}
+                disabled={isRunning}
+                className="speed-reader-input"
+              />
+            </label>
+            <label className="speed-reader-label">
+              <span>Word size (px)</span>
+              <input
+                type="number"
+                min={8}
+                value={fontSizeInput}
+                onChange={(e) => setFontSizeInput(e.target.value)}
                 disabled={isRunning}
                 className="speed-reader-input"
               />
@@ -148,7 +225,7 @@ function SpeedReader() {
 
         {chunks.length > 0 && (
           <div className="speed-reader-display-wrap">
-            <div className="speed-reader-display">
+            <div className="speed-reader-display" style={{ fontSize: `${displayFontSize}px` }}>
               {displayChunk}
             </div>
             <div className="speed-reader-progress">
