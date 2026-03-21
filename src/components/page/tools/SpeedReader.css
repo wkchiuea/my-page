@@ -45,26 +45,37 @@
   margin-bottom: 2rem;
 }
 
-.speed-reader-passage-masked {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+/* Don’t let flex layout compress the passage when the flash display below reflows */
+.speed-reader-passage-slot {
+  flex-shrink: 0;
+  min-height: 0;
 }
 
-.speed-reader-masked-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #334155;
+.speed-reader-passage-label {
+  min-height: 0;
 }
 
-.speed-reader-masked-content {
-  padding: 0.75rem 1rem;
+.speed-reader-textarea.speed-reader-textarea--frozen {
+  box-sizing: border-box;
+  min-height: 10.5rem;
+  height: 10.5rem;
+  max-height: 10.5rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  resize: none;
+  cursor: not-allowed;
   background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: #64748b;
-  letter-spacing: 0.05em;
+  color: #475569;
+  opacity: 1;
+  -webkit-text-fill-color: #475569;
+}
+
+/* Keep masked `*` text visible (some UAs fade disabled fields) */
+.speed-reader-textarea.speed-reader-textarea--frozen:disabled {
+  opacity: 1;
+  color: #475569;
+  -webkit-text-fill-color: #475569;
+  background: #f1f5f9;
 }
 
 .speed-reader-label {
@@ -203,6 +214,76 @@
   color: #64748b;
   text-align: center;
   margin-bottom: 1rem;
+}
+
+.speed-reader-recall-prompt {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.speed-reader-recall-panel {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.speed-reader-recall-input {
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.speed-reader-recall-input:focus {
+  outline: none;
+  border-color: #0f766e;
+  box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.2);
+}
+
+.speed-reader-recall-input:disabled {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.speed-reader-recall-result {
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.speed-reader-recall-result--match {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.speed-reader-recall-result--miss {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.speed-reader-recall-result-title {
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.speed-reader-recall-result p {
+  margin: 0.35rem 0 0 0;
+}
+
+.speed-reader-recall-text {
+  word-break: break-word;
+}
+
+.speed-reader-recall-actions {
+  margin-top: 0.25rem;
 }
 
 .speed-reader-controls {
