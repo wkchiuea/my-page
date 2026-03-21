@@ -282,8 +282,18 @@
   word-break: break-word;
 }
 
-.speed-reader-recall-actions {
+.speed-reader-recall-actions-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
   margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.speed-reader-recall-actions-row .speed-reader-btn {
+  min-width: 5.5rem;
 }
 
 .speed-reader-controls {

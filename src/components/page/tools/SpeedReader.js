@@ -29,10 +29,13 @@ function SpeedReader() {
   const [recallFlashVisible, setRecallFlashVisible] = useState(false);
   const [recallUserInput, setRecallUserInput] = useState('');
   const [recallResult, setRecallResult] = useState(null);
+  /** After a flash hides, true until user submits with Enter (recall mode). */
+  const [awaitingRecallInput, setAwaitingRecallInput] = useState(false);
   const timerRef = useRef(null);
   const flashTimerRef = useRef(null);
   const passageTextareaRef = useRef(null);
   const passageScrollTopRef = useRef(0);
+  const recallInputRef = useRef(null);
 
   const displayChunk = chunks.length ? chunks[Math.min(currentIndex, chunks.length - 1)] : '';
   const isDone = chunks.length > 0 && currentIndex >= chunks.length;
@@ -66,6 +69,26 @@ function SpeedReader() {
     el.scrollTop = passageScrollTopRef.current;
   }, [recallFlashVisible, isRunning]);
 
+  /** After each flash, focus recall field so typing can start immediately. */
+  useLayoutEffect(() => {
+    if (
+      !isRecallSession ||
+      recallFlashVisible ||
+      !awaitingRecallInput ||
+      recallResult != null
+    ) {
+      return;
+    }
+    const el = recallInputRef.current;
+    if (!el || el.disabled) return;
+    el.focus({ preventScroll: true });
+  }, [
+    isRecallSession,
+    recallFlashVisible,
+    awaitingRecallInput,
+    recallResult,
+  ]);
+
   /** Normal mode: auto-advance chunks */
   useEffect(() => {
     if (isRecall || !isRunning || isPaused || chunks.length === 0) return;
@@ -84,19 +107,18 @@ function SpeedReader() {
     return clearTimer;
   }, [isRecall, isRunning, isPaused, currentIndex, chunks.length, activeDurationMs]);
 
-  const startRecallFlash = useCallback(
-    (durationMs) => {
-      clearFlashTimer();
-      setRecallFlashVisible(true);
-      setRecallResult(null);
-      setRecallUserInput('');
-      flashTimerRef.current = setTimeout(() => {
-        setRecallFlashVisible(false);
-        flashTimerRef.current = null;
-      }, Math.max(1, durationMs));
-    },
-    []
-  );
+  const startRecallFlash = useCallback((durationMs) => {
+    clearFlashTimer();
+    setAwaitingRecallInput(false);
+    setRecallFlashVisible(true);
+    setRecallResult(null);
+    setRecallUserInput('');
+    flashTimerRef.current = setTimeout(() => {
+      setRecallFlashVisible(false);
+      setAwaitingRecallInput(true);
+      flashTimerRef.current = null;
+    }, Math.max(1, durationMs));
+  }, []);
 
   const handleStart = () => {
     const words = passage.trim().split(/\s+/).filter(Boolean);
@@ -126,37 +148,68 @@ function SpeedReader() {
     setIsPaused(false);
     setRecallResult(null);
     setRecallUserInput('');
+    setAwaitingRecallInput(false);
 
     if (isRecall) {
       clearFlashTimer();
+      setRecallFlashVisible(false);
       setIsRunning(true);
-      startRecallFlash(durationMs);
     } else {
       setIsRunning(true);
     }
   };
 
-  const handleRecallCheck = (e) => {
-    if (e.key !== 'Enter') return;
-    e.preventDefault();
+  const submitRecallCheck = useCallback(() => {
     if (!isRecallSession || recallFlashVisible || recallResult != null) return;
     const expected = displayChunk;
     const entered = recallUserInput;
     const match = entered.trim() === expected.trim();
     setRecallResult({ match, expected, entered });
+  }, [
+    isRecallSession,
+    recallFlashVisible,
+    recallResult,
+    displayChunk,
+    recallUserInput,
+  ]);
+
+  const handleRecallInputKeyDown = (e) => {
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    if (recallResult != null) {
+      handleRecallNext();
+      return;
+    }
+    submitRecallCheck();
   };
 
   const handleRecallNext = () => {
-    if (!isRecallSession || !recallResult) return;
-    if (currentIndex >= chunks.length - 1) {
-      clearFlashTimer();
-      setIsRunning(false);
-      setRecallFlashVisible(false);
+    if (!isRecallSession) return;
+    if (recallFlashVisible) return;
+
+    if (recallResult != null) {
+      if (currentIndex >= chunks.length - 1) {
+        clearFlashTimer();
+        setIsRunning(false);
+        setRecallFlashVisible(false);
+        setRecallResult(null);
+        setRecallUserInput('');
+        setAwaitingRecallInput(false);
+        return;
+      }
+      setCurrentIndex((i) => i + 1);
       setRecallResult(null);
       setRecallUserInput('');
+      setAwaitingRecallInput(false);
+      startRecallFlash(activeDurationMs);
       return;
     }
-    setCurrentIndex((i) => i + 1);
+
+    if (awaitingRecallInput) {
+      submitRecallCheck();
+      return;
+    }
+
     startRecallFlash(activeDurationMs);
   };
 
@@ -178,6 +231,7 @@ function SpeedReader() {
     setRecallFlashVisible(false);
     setRecallResult(null);
     setRecallUserInput('');
+    setAwaitingRecallInput(false);
   };
 
   const canStart =
@@ -196,11 +250,6 @@ function SpeedReader() {
         ? displayChunk
         : ''
       : displayChunk;
-
-  const recallCanNext =
-    isRecallSession && recallResult != null && currentIndex < chunks.length - 1;
-  const recallFinishedLast =
-    isRecallSession && recallResult != null && currentIndex >= chunks.length - 1;
 
   return (
     <div className="speed-reader-page">
@@ -357,27 +406,31 @@ function SpeedReader() {
           <div className="speed-reader-display-wrap">
             <div className="speed-reader-display" style={{ fontSize: `${displayFontSize}px` }}>
               {showDisplayText}
-              {isRecallSession && !recallFlashVisible && !recallResult && (
+              {isRecallSession && awaitingRecallInput && !recallFlashVisible && !recallResult && (
                 <span className="speed-reader-recall-prompt">…</span>
               )}
             </div>
             <div className="speed-reader-progress">
               Chunk {Math.min(currentIndex + 1, chunks.length)} of {chunks.length}
-              {isRecall && recallFinishedLast && ' (recall complete)'}
               {!isRecall && isDone && ' (done)'}
             </div>
 
             {isRecallSession && (
               <div className="speed-reader-recall-panel">
                 <label className="speed-reader-label">
-                  <span>Type what you saw, then press Enter</span>
+                  <span>Type what you saw, then press Enter or Next (Enter again after check to continue)</span>
                   <input
+                    ref={recallInputRef}
                     type="text"
                     className="speed-reader-recall-input"
                     value={recallUserInput}
                     onChange={(e) => setRecallUserInput(e.target.value)}
-                    onKeyDown={handleRecallCheck}
-                    disabled={recallFlashVisible || recallResult != null}
+                    onKeyDown={handleRecallInputKeyDown}
+                    readOnly={recallResult != null}
+                    disabled={
+                      recallFlashVisible ||
+                      (!awaitingRecallInput && recallResult == null)
+                    }
                     placeholder="Your recall…"
                   />
                 </label>
@@ -396,17 +449,17 @@ function SpeedReader() {
                     </p>
                   </div>
                 )}
-                <div className="speed-reader-controls speed-reader-recall-actions">
-                  {recallCanNext && (
-                    <button type="button" onClick={handleRecallNext} className="speed-reader-btn speed-reader-btn-primary">
-                      Next chunk
-                    </button>
-                  )}
-                  {recallFinishedLast && (
-                    <button type="button" onClick={handleStop} className="speed-reader-btn speed-reader-btn-primary">
-                      Done
-                    </button>
-                  )}
+                <div className="speed-reader-recall-actions-row">
+                  <button type="button" onClick={handleStop} className="speed-reader-btn">
+                    Stop
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRecallNext}
+                    className="speed-reader-btn speed-reader-btn-primary"
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
             )}
@@ -416,11 +469,6 @@ function SpeedReader() {
                 <button onClick={handlePauseResume} className="speed-reader-btn">
                   {isPaused ? 'Resume' : 'Pause'}
                 </button>
-                <button onClick={handleStop} className="speed-reader-btn">Stop</button>
-              </div>
-            )}
-            {isRecallSession && (
-              <div className="speed-reader-controls">
                 <button onClick={handleStop} className="speed-reader-btn">Stop</button>
               </div>
             )}
