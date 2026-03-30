@@ -105,6 +105,9 @@ function Timetable() {
   const [taskJsonModalOpen, setTaskJsonModalOpen] = useState(false);
   const [configJsonModalOpen, setConfigJsonModalOpen] = useState(false);
 
+  const [draggingTaskId, setDraggingTaskId] = useState(null);
+  const [taskDragOverId, setTaskDragOverId] = useState(null);
+
   const dayLabels = weekStartsOn === 'sunday' ? DAY_LABELS_SUN : DAY_LABELS_MON;
 
   const slotLabels = useMemo(() => {
@@ -336,6 +339,19 @@ function Timetable() {
     setNewTaskName('');
   };
 
+  const reorderTasks = useCallback((fromId, toId) => {
+    if (!fromId || !toId || fromId === toId) return;
+    setTasks((prev) => {
+      const fromIdx = prev.findIndex((t) => t.id === fromId);
+      const toIdx = prev.findIndex((t) => t.id === toId);
+      if (fromIdx < 0 || toIdx < 0) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(fromIdx, 1);
+      next.splice(toIdx, 0, moved);
+      return next;
+    });
+  }, []);
+
   const patchTask = (id, partial) => {
     setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, ...partial } : t)));
   };
@@ -510,8 +526,41 @@ function Timetable() {
           {tasks.length > 0 && !taskListHidden && (
             <ul className="timetable-task-list timetable-task-list--compact">
               {tasks.map((t) => (
-                <li key={t.id} className="timetable-task-item">
-                  <span className="timetable-task-swatch" style={{ background: t.color }} title="Block color" />
+                <li
+                  key={t.id}
+                  className={`timetable-task-item${taskDragOverId === t.id ? ' timetable-task-item--drag-over' : ''}`}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setTaskDragOverId(t.id);
+                  }}
+                  onDragLeave={() => {
+                    setTaskDragOverId((cur) => (cur === t.id ? null : cur));
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    if (draggingTaskId && draggingTaskId !== t.id) {
+                      reorderTasks(draggingTaskId, t.id);
+                    }
+                    setDraggingTaskId(null);
+                    setTaskDragOverId(null);
+                  }}
+                >
+                  <span
+                    className="timetable-task-swatch timetable-task-dnd-handle"
+                    style={{ background: t.color }}
+                    title="Drag to reorder"
+                    draggable
+                    onDragStart={(e) => {
+                      setDraggingTaskId(t.id);
+                      setTaskDragOverId(t.id);
+                      e.dataTransfer.effectAllowed = 'move';
+                      e.dataTransfer.setData('text/plain', t.id);
+                    }}
+                    onDragEnd={() => {
+                      setDraggingTaskId(null);
+                      setTaskDragOverId(null);
+                    }}
+                  />
                   <input
                     type="text"
                     className="timetable-task-name-edit"

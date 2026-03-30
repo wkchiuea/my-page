@@ -256,6 +256,19 @@
   height: 0.75rem;
 }
 
+.timetable-task-dnd-handle {
+  cursor: grab;
+}
+
+.timetable-task-dnd-handle:active {
+  cursor: grabbing;
+}
+
+.timetable-task-item--drag-over {
+  outline: 2px dashed rgba(15, 118, 110, 0.85);
+  outline-offset: 2px;
+}
+
 .timetable-task-name-text {
   flex: 1;
   font-size: 0.9375rem;
