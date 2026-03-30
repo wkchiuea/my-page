@@ -48,7 +48,7 @@ function defaultConfigShape() {
   return {
     startTime: '06:00',
     endTime: '23:00',
-    intervalMinutes: 15,
+    intervalMinutes: 20,
     weekStartsOn: 'monday',
     tasks: [],
     assignments: {},
@@ -73,6 +73,57 @@ function parseTasksPayload(raw) {
     return data.tasks.map(normalizeTaskFromData);
   }
   throw new Error('Expected a task array or { "tasks": [...] }');
+}
+
+function flattenAssignments(rawAssignments) {
+  if (!rawAssignments || typeof rawAssignments !== 'object') return {};
+  const keys = Object.keys(rawAssignments);
+  if (keys.length === 0) return {};
+  const sample = rawAssignments[keys[0]];
+
+  // Backward compatibility: old flat format { "0_0": "task-id" }.
+  if (typeof sample === 'string' || sample == null) {
+    const flat = {};
+    keys.forEach((k) => {
+      const tid = rawAssignments[k];
+      if (tid == null || tid === '') return;
+      flat[k] = String(tid);
+    });
+    return flat;
+  }
+
+  // New nested format: { "0": { "0": "task-id", "1": "task-id" }, ... }.
+  const flat = {};
+  keys.forEach((dayKey) => {
+    const dayObj = rawAssignments[dayKey];
+    if (!dayObj || typeof dayObj !== 'object') return;
+    Object.keys(dayObj).forEach((slotKey) => {
+      const tid = dayObj[slotKey];
+      if (tid == null || tid === '') return;
+      flat[`${dayKey}_${slotKey}`] = String(tid);
+    });
+  });
+  return flat;
+}
+
+function nestAssignments(flatAssignments) {
+  const nested = {};
+  Object.keys(flatAssignments || {}).forEach((k) => {
+    const tid = flatAssignments[k];
+    const [day, slot] = k.split('_');
+    if (day == null || slot == null) return;
+    if (!nested[day]) nested[day] = {};
+    nested[day][slot] = tid;
+  });
+  return nested;
+}
+
+function toCondensedJson(rawText) {
+  try {
+    return JSON.stringify(JSON.parse(rawText || '{}'));
+  } catch {
+    return (rawText || '').replace(/\s+/g, ' ').trim();
+  }
 }
 
 function Timetable() {
@@ -107,6 +158,10 @@ function Timetable() {
 
   const [draggingTaskId, setDraggingTaskId] = useState(null);
   const [taskDragOverId, setTaskDragOverId] = useState(null);
+  const [selectionAnchor, setSelectionAnchor] = useState(null);
+  const [selectionFocus, setSelectionFocus] = useState(null);
+  const [isSelectingCells, setIsSelectingCells] = useState(false);
+  const [copiedTaskId, setCopiedTaskId] = useState(undefined);
 
   const dayLabels = weekStartsOn === 'sunday' ? DAY_LABELS_SUN : DAY_LABELS_MON;
 
@@ -135,7 +190,7 @@ function Timetable() {
       intervalMinutes,
       weekStartsOn,
       tasks,
-      assignments,
+      assignments: nestAssignments(assignments),
     };
   }, [startTime, endTime, intervalMinutes, weekStartsOn, tasks, assignments]);
 
@@ -165,13 +220,7 @@ function Timetable() {
     const rawTasks = Array.isArray(data.tasks) ? data.tasks : [];
     const normalizedTasks = rawTasks.map(normalizeTaskFromData);
 
-    const rawAssign = data.assignments && typeof data.assignments === 'object' ? data.assignments : {};
-    const nextAssign = {};
-    Object.keys(rawAssign).forEach((k) => {
-      const tid = rawAssign[k];
-      if (tid == null || tid === '') return;
-      nextAssign[k] = String(tid);
-    });
+    const nextAssign = flattenAssignments(data.assignments);
 
     setStartTime(start);
     setEndTime(end);
@@ -182,6 +231,8 @@ function Timetable() {
     setNumSlots(slots);
     setGridReady(true);
     setPicker(null);
+    setSelectionAnchor(null);
+    setSelectionFocus(null);
   }, []);
 
   const handleCreate = useCallback(() => {
@@ -313,6 +364,9 @@ function Timetable() {
     setGridReady(false);
     setNumSlots(0);
     setPicker(null);
+    setSelectionAnchor(null);
+    setSelectionFocus(null);
+    setCopiedTaskId(undefined);
     setConfigError('');
     setTaskListHidden(false);
   }, []);
@@ -379,6 +433,101 @@ function Timetable() {
     });
     setPicker(null);
   };
+
+  const setCellTask = useCallback((dayIdx, slotIdx, taskId) => {
+    const key = cellKey(dayIdx, slotIdx);
+    setAssignments((prev) => {
+      const next = { ...prev };
+      if (taskId == null || taskId === '') delete next[key];
+      else next[key] = taskId;
+      return next;
+    });
+  }, []);
+
+  const getSelectionBounds = useCallback(() => {
+    if (!selectionAnchor || !selectionFocus) return null;
+    const minDay = Math.min(selectionAnchor.dayIdx, selectionFocus.dayIdx);
+    const maxDay = Math.max(selectionAnchor.dayIdx, selectionFocus.dayIdx);
+    const minSlot = Math.min(selectionAnchor.slotIdx, selectionFocus.slotIdx);
+    const maxSlot = Math.max(selectionAnchor.slotIdx, selectionFocus.slotIdx);
+    return { minDay, maxDay, minSlot, maxSlot };
+  }, [selectionAnchor, selectionFocus]);
+
+  const isCellSelected = useCallback(
+    (dayIdx, slotIdx) => {
+      const bounds = getSelectionBounds();
+      if (!bounds) return false;
+      return (
+        dayIdx >= bounds.minDay &&
+        dayIdx <= bounds.maxDay &&
+        slotIdx >= bounds.minSlot &&
+        slotIdx <= bounds.maxSlot
+      );
+    },
+    [getSelectionBounds]
+  );
+
+  const copySelectedCell = useCallback(() => {
+    const bounds = getSelectionBounds();
+    if (!bounds) return;
+    const key = cellKey(bounds.minDay, bounds.minSlot);
+    setCopiedTaskId(assignments[key] ?? null);
+  }, [getSelectionBounds, assignments]);
+
+  const pasteToSelectedCell = useCallback(() => {
+    const bounds = getSelectionBounds();
+    if (!bounds || copiedTaskId === undefined) return;
+    for (let dayIdx = bounds.minDay; dayIdx <= bounds.maxDay; dayIdx += 1) {
+      for (let slotIdx = bounds.minSlot; slotIdx <= bounds.maxSlot; slotIdx += 1) {
+        setCellTask(dayIdx, slotIdx, copiedTaskId);
+      }
+    }
+  }, [getSelectionBounds, copiedTaskId, setCellTask]);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      const target = e.target;
+      const tag = target && target.tagName ? target.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || target?.isContentEditable) return;
+      if (!(e.metaKey || e.ctrlKey)) return;
+      if (!selectionAnchor || !selectionFocus) return;
+      const key = e.key.toLowerCase();
+      if (key === 'c') {
+        e.preventDefault();
+        copySelectedCell();
+      } else if (key === 'v') {
+        e.preventDefault();
+        pasteToSelectedCell();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [selectionAnchor, selectionFocus, copySelectedCell, pasteToSelectedCell]);
+
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key !== 'Escape') return;
+      if (picker) {
+        setPicker(null);
+        return;
+      }
+      if (taskJsonModalOpen) {
+        setTaskJsonModalOpen(false);
+        return;
+      }
+      if (configJsonModalOpen) {
+        setConfigJsonModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [picker, taskJsonModalOpen, configJsonModalOpen]);
+
+  useEffect(() => {
+    const onMouseUp = () => setIsSelectingCells(false);
+    window.addEventListener('mouseup', onMouseUp);
+    return () => window.removeEventListener('mouseup', onMouseUp);
+  }, []);
 
   return (
     <div className="tool-page timetable-page">
@@ -604,6 +753,27 @@ function Timetable() {
         {gridReady && numSlots > 0 && (
           <section className="timetable-section timetable-grid-wrap">
             <h2 className="timetable-section-title">Schedule</h2>
+            <div className="timetable-copy-row">
+              <button
+                type="button"
+                className="tool-btn"
+                onClick={copySelectedCell}
+                disabled={!selectionAnchor || !selectionFocus}
+              >
+                Copy cell
+              </button>
+              <button
+                type="button"
+                className="tool-btn"
+                onClick={pasteToSelectedCell}
+                disabled={!selectionAnchor || !selectionFocus || copiedTaskId === undefined}
+              >
+                Paste cell
+              </button>
+              <span className="timetable-copy-hint">
+                Drag to select multiple cells. Double-click a cell to edit. Cmd/Ctrl+C and Cmd/Ctrl+V supported.
+              </span>
+            </div>
             <div className="timetable-table-scroll">
               <table className="timetable-table">
                 <thead>
@@ -627,11 +797,28 @@ function Timetable() {
                         return (
                           <td
                             key={key}
-                            className="timetable-slot"
+                            className={`timetable-slot${
+                              isCellSelected(dayIdx, slotIdx) ? ' timetable-slot-selected' : ''
+                            }`}
                             style={{
                               background: task ? task.color : '#f8fafc',
                             }}
-                            onClick={() => setPicker({ dayIdx, slotIdx })}
+                            onMouseDown={(e) => {
+                              setPicker(null);
+                              if (e.shiftKey && selectionAnchor) {
+                                setSelectionFocus({ dayIdx, slotIdx });
+                              } else {
+                                setSelectionAnchor({ dayIdx, slotIdx });
+                                setSelectionFocus({ dayIdx, slotIdx });
+                              }
+                              setIsSelectingCells(true);
+                            }}
+                            onMouseEnter={() => {
+                              if (!isSelectingCells) return;
+                              setSelectionFocus({ dayIdx, slotIdx });
+                            }}
+                            onMouseUp={() => setIsSelectingCells(false)}
+                            onDoubleClick={() => setPicker({ dayIdx, slotIdx })}
                             title={task ? task.name : 'Empty — click to assign'}
                           >
                             {task && (
@@ -705,6 +892,16 @@ function Timetable() {
                 rows={10}
                 spellCheck={false}
               />
+              <label className="tool-label timetable-json-condensed-label">
+                <span>Condensed JSON (single line)</span>
+                <input
+                  type="text"
+                  className="tool-input timetable-json-condensed-input"
+                  value={toCondensedJson(taskConfigText)}
+                  onChange={(e) => setTaskConfigText(e.target.value)}
+                  spellCheck={false}
+                />
+              </label>
               <div className="timetable-json-modal-actions">
                 <button type="button" className="tool-btn" onClick={() => setTaskJsonModalOpen(false)}>
                   Close
@@ -744,6 +941,16 @@ function Timetable() {
                 rows={12}
                 spellCheck={false}
               />
+              <label className="tool-label timetable-json-condensed-label">
+                <span>Condensed JSON (single line)</span>
+                <input
+                  type="text"
+                  className="tool-input timetable-json-condensed-input"
+                  value={toCondensedJson(configText)}
+                  onChange={(e) => setConfigText(e.target.value)}
+                  spellCheck={false}
+                />
+              </label>
               <div className="timetable-json-modal-actions">
                 <button type="button" className="tool-btn" onClick={() => setConfigJsonModalOpen(false)}>
                   Close
