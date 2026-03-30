@@ -354,7 +354,7 @@
   line-height: 1.2;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 5.5rem;
+  max-width: 8rem;
 }
 
 .timetable-picker-backdrop {
