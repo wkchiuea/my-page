@@ -512,9 +512,14 @@ function Timetable() {
               {tasks.map((t) => (
                 <li key={t.id} className="timetable-task-item">
                   <span className="timetable-task-swatch" style={{ background: t.color }} title="Block color" />
-                  <span className="timetable-task-name-text" style={{ color: t.fontColor || '#0f172a' }}>
-                    {t.name}
-                  </span>
+                  <input
+                    type="text"
+                    className="timetable-task-name-edit"
+                    style={{ color: t.fontColor || '#0f172a' }}
+                    value={t.name}
+                    onChange={(e) => patchTask(t.id, { name: e.target.value })}
+                    aria-label={`Edit task name: ${t.name}`}
+                  />
                   <input
                     type="color"
                     className="timetable-task-mini-color"

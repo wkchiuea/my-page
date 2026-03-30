@@ -189,6 +189,21 @@
   min-width: 0;
 }
 
+.timetable-task-name-edit {
+  width: 100%;
+  min-width: 0;
+  font-size: 0.8125rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+}
+
+.timetable-task-name-edit:focus {
+  box-shadow: inset 0 -1px 0 rgba(15, 118, 110, 0.8);
+}
+
 .timetable-task-mini-color {
   width: 1.5rem;
   height: 1.5rem;
