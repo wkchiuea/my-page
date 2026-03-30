@@ -124,11 +124,6 @@
   margin-bottom: 0;
 }
 
-.timetable-hide-list-btn {
-  font-size: 0.8125rem;
-  padding: 0.35rem 0.65rem;
-}
-
 .timetable-task-import-export {
   display: flex;
   flex-wrap: wrap;
@@ -170,9 +165,10 @@
 
 .timetable-task-list--compact {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.35rem 0.5rem;
-  max-width: 520px;
+  width: 100%;
+  max-width: none;
 }
 
 .timetable-task-list--compact .timetable-task-item {

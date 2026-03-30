@@ -434,15 +434,6 @@ function Timetable() {
         <section className="timetable-section">
           <div className="timetable-task-section-head">
             <h2 className="timetable-section-title timetable-task-section-title">Tasks</h2>
-            {tasks.length > 0 && (
-              <button
-                type="button"
-                className="tool-btn timetable-hide-list-btn"
-                onClick={() => setTaskListHidden((h) => !h)}
-              >
-                {taskListHidden ? 'Show task list' : 'Hide task list'}
-              </button>
-            )}
           </div>
           <div className="timetable-task-add">
             <label className="tool-label timetable-task-name">
@@ -506,6 +497,15 @@ function Timetable() {
             <button type="button" className="tool-btn" onClick={() => setTaskJsonModalOpen(true)}>
               Edit task JSON
             </button>
+            {tasks.length > 0 && (
+              <button
+                type="button"
+                className="tool-btn"
+                onClick={() => setTaskListHidden((h) => !h)}
+              >
+                {taskListHidden ? 'Show task list' : 'Hide task list'}
+              </button>
+            )}
           </div>
           {tasks.length > 0 && !taskListHidden && (
             <ul className="timetable-task-list timetable-task-list--compact">
@@ -696,6 +696,16 @@ function Timetable() {
                 </button>
                 <button
                   type="button"
+                  className="tool-btn timetable-clear-config-btn"
+                  onClick={() => {
+                    handleClearConfig();
+                    setConfigJsonModalOpen(false);
+                  }}
+                >
+                  Clear local config
+                </button>
+                <button
+                  type="button"
                   className="tool-btn tool-btn-primary"
                   onClick={() => {
                     handleLoadConfig();
@@ -717,9 +727,6 @@ function Timetable() {
             </button>
             <button type="button" className="tool-btn" onClick={handleSaveLocal}>
               Save to local
-            </button>
-            <button type="button" className="tool-btn timetable-clear-config-btn" onClick={handleClearConfig}>
-              Clear config
             </button>
             <button type="button" className="tool-btn" onClick={() => setConfigJsonModalOpen(true)}>
               Edit config JSON
