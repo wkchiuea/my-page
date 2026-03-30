@@ -8,6 +8,7 @@ const TOOLS = [
   { path: 'flash-number', name: 'Flash Number', sub: null },
   { path: 'metronome', name: 'Metronome', sub: '節拍器' },
   { path: 'timer', name: 'Timer', sub: '計時器' },
+  { path: 'timetable', name: 'Timetable', sub: '時間表' },
 ];
 
 function ToolsPage() {

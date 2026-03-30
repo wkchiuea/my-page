@@ -11,6 +11,7 @@ import ToolsPage from './components/page/ToolsPage';
 import SpeedReader from './components/page/tools/SpeedReader';
 import Metronome from './components/page/tools/Metronome';
 import Timer from './components/page/tools/Timer';
+import Timetable from './components/page/tools/Timetable';
 import Sidebar from './components/Sidebar';
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
               <Route path="/tools/flash-number" element={<PlaceholderPage title="Flash Number" />} />
               <Route path="/tools/metronome" element={<Metronome />} />
               <Route path="/tools/timer" element={<Timer />} />
+              <Route path="/tools/timetable" element={<Timetable />} />
             </Routes>
             </div>
             <div className="right-column">
