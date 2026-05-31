@@ -47,16 +47,16 @@ function Sidebar() {
 
         <nav className="sidebar-nav">
           <Link to="/" className="nav-link">
-            <span className="nav-icon">🏠</span>
-            <span className="nav-text">Home</span>
-          </Link>
-          <Link to="/about" className="nav-link">
             <span className="nav-icon">👤</span>
             <span className="nav-text">About</span>
           </Link>
           <Link to="/projects" className="nav-link">
             <span className="nav-icon">💼</span>
             <span className="nav-text">Projects</span>
+          </Link>
+          <Link to="/blog" className="nav-link">
+            <span className="nav-icon">🗓️</span>
+            <span className="nav-text">Blog</span>
           </Link>
           <Link to="/category" className="nav-link">
             <span className="nav-icon">🏷️</span>

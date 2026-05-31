@@ -25,10 +25,10 @@ function App() {
           <div className={`main-content${sidebarVisible ? '' : ' sidebar-hidden'}`}>
             <div className="left-column">
             <Routes>
-              <Route path="/" element={<ArticleList />} />
-              <Route path="/article/:id" element={<ArticlePage />} />
-              <Route path="/about" element={<AboutPage />} />
+              <Route path="/" element={<AboutPage />} />
               <Route path="/projects" element={<PlaceholderPage title="Projects" />} />
+              <Route path="/blog" element={<ArticleList />} />
+              <Route path="/article/:id" element={<ArticlePage />} />
               <Route path="/category" element={<PlaceholderPage title="Category" />} />
               <Route path="/tools" element={<ToolsPage />} />
               <Route path="/tools/speed-reader" element={<SpeedReader />} />

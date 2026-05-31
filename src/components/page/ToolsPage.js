@@ -17,8 +17,6 @@ function ToolsPage() {
   return (
     <div className="tools-page">
       <div className="tools-container">
-        <button onClick={() => navigate('/')} className="back-button">← Back to Home</button>
-
         <header className="tools-header">
           <h1 className="tools-title">Tools</h1>
           <p className="tools-desc">Small utilities for reading, focus, and timing.</p>

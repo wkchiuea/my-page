@@ -11,12 +11,10 @@ function AboutPage() {
   return (
     <div className="about-page">
       <div className="about-container">
-        <button onClick={() => navigate('/')} className="back-button">← Back to Home</button>
-
         <header className="about-hero">
           <div className="about-hero-inner">
             <h1 className="about-name">Louis Chiu · カツラ</h1>
-            <p className="about-tagline">Software Developer · Fullstack</p>
+            <p className="about-tagline">AI Engineer · Fullstack</p>
           </div>
         </header>
 
