@@ -77,6 +77,7 @@ function main() {
 
   const files = getAllMdFiles(ARTICLES_SRC);
   const articles = [];
+  const validIds = new Set();
 
   if (!fs.existsSync(PUBLIC_ARTICLES)) {
     fs.mkdirSync(PUBLIC_ARTICLES, { recursive: true });
@@ -87,6 +88,7 @@ function main() {
     const { frontmatter, content } = parseFrontmatter(raw);
     const id = path.basename(rel, '.md');
     const excerpt = firstWords(content, EXCERPT_WORDS);
+    validIds.add(id);
 
     articles.push({
       id,
@@ -102,10 +104,22 @@ function main() {
     fs.writeFileSync(destPath, raw, 'utf8');
   }
 
+  // Prune orphaned .md files: remove any copy in public/articles whose
+  // source .md no longer exists, keeping the dir in sync with articles.json.
+  let removed = 0;
+  for (const name of fs.readdirSync(PUBLIC_ARTICLES)) {
+    if (!name.endsWith('.md')) continue;
+    const id = path.basename(name, '.md');
+    if (!validIds.has(id)) {
+      fs.rmSync(path.join(PUBLIC_ARTICLES, name));
+      removed++;
+    }
+  }
+
   articles.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
   fs.writeFileSync(ARTICLES_JSON, JSON.stringify({ articles }, null, 2), 'utf8');
-  console.log(`Generated ${ARTICLES_JSON} with ${articles.length} articles and copied .md files to ${PUBLIC_ARTICLES}`);
+  console.log(`Generated ${ARTICLES_JSON} with ${articles.length} articles and copied .md files to ${PUBLIC_ARTICLES}` + (removed ? ` (pruned ${removed} orphaned .md file${removed === 1 ? '' : 's'})` : ''));
 }
 
 main();
