@@ -1,11 +1,9 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import config from '../../config/config.json';
 import '../ArticlePage.css';
 import './AboutPage.css';
 
 function AboutPage() {
-  const navigate = useNavigate();
   const { skills = [], certifications = [], languages = [] } = config.aboutPage || {};
 
   return (
