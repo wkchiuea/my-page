@@ -853,17 +853,19 @@ function Timetable() {
                 <button type="button" className="tool-btn" onClick={() => assignCell(null)}>
                   Clear
                 </button>
-                {tasks.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    className="tool-btn timetable-picker-task"
-                    onClick={() => assignCell(t.id)}
-                  >
-                    <span className="timetable-task-swatch small" style={{ background: t.color }} />
-                    <span style={{ color: t.fontColor || '#0f172a' }}>{t.name}</span>
-                  </button>
-                ))}
+                <div className="timetable-picker-tasks-grid">
+                  {tasks.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      className="tool-btn timetable-picker-task"
+                      onClick={() => assignCell(t.id)}
+                    >
+                      <span className="timetable-task-swatch small" style={{ background: t.color }} />
+                      <span style={{ color: t.fontColor || '#0f172a' }}>{t.name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
               {tasks.length === 0 && (
                 <p className="timetable-picker-empty">Add tasks above first, or clear this block.</p>
